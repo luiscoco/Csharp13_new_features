@@ -1107,6 +1107,114 @@ class Program
 
 ## 10. Overload resolution priority
 
+**C# 13** introduces a new attribute called **OverloadResolutionPriorityAttribute**.
+
+This attribute lets library authors explicitly **define priority among overloads** when resolving method calls.
+
+**Why is this useful?**
+
+Imagine you have a library **method with multiple overloads**. Over time, you **add a new overload** that's more efficient or offers better usability.
+
+You want your **library users** to **automatically pick up this new overload** when they recompile their code, without breaking existing compatibility or causing ambiguity.
+
+This attribute allows you to explicitly control overload resolution, guiding users to newer, better APIs seamlessly.
+
+**Key rules and behavior**:
+
+The attribute takes a single integer parameter indicating priority.
+
+```csharp
+[OverloadResolutionPriority(1)]  // Higher number = higher priority
+```
+
+a) Higher number → Higher priority (preferred overload).
+
+b) If multiple overloads apply equally, the compiler selects the one with the highest priority number.
+
+c) If no attribute is specified, default priority is considered zero.
+
+### 10.1. Sample
+
+**Step 1: Before C# 13 (without priorities)**
+
+```csharp
+public class Calculator
+{
+    public int Add(int a, int b)
+    {
+        Console.WriteLine("Using old overload (int, int)");
+        return a + b;
+    }
+
+    public double Add(double a, double b)
+    {
+        Console.WriteLine("Using double overload (double, double)");
+        return a + b;
+    }
+}
+```
+
+**Calling**:
+
+```csharp
+var calc = new Calculator();
+var result = calc.Add(5, 10);
+```
+
+```
+// Output: Using old overload (int, int)
+```
+
+No ambiguity here, but let's say you introduce a better overload later:
+
+**Step 2: Introduce new overload with priority (C# 13)**
+
+```csharp
+// Include necessary namespace
+using System.Runtime.CompilerServices;
+
+public class Calculator
+{
+    public int Add(int a, int b)
+    {
+        Console.WriteLine("Using old overload (int, int)");
+        return a + b;
+    }
+
+    public double Add(double a, double b)
+    {
+        Console.WriteLine("Using double overload (double, double)");
+        return a + b;
+    }
+
+    [OverloadResolutionPriority(1)] // Higher priority
+    public int Add(ReadOnlySpan<int> numbers)
+    {
+        Console.WriteLine("Using optimized overload (ReadOnlySpan<int>)");
+        int sum = 0;
+        foreach (var num in numbers)
+            sum += num;
+        return sum;
+    }
+}
+```
+
+Now, when users recompile:
+
+```csharp
+var calc = new Calculator();
+var result = calc.Add(new int[] { 5, 10 });
+Console.WriteLine($"Result: {result}");
+```
+
+```
+Output after recompiling:
+Using optimized overload (ReadOnlySpan<int>)
+Result: 15
+```
+
+The compiler now prefers the overload with the highest priority, guiding users toward the newer, optimized overload.
+
 
 
 ## 11. The field keyword
