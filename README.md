@@ -531,47 +531,47 @@ var countdown = new TimerRemaining()
 };
 ```
 
-How the indexing with ^ works:
+How the indexing with **^** works:
 
-[^1] → last element (buffer[9])
+**[^1]** → last element (**buffer[9]**)
 
-[^2] → second-to-last element (buffer[8])
+**[^2]** → second-to-last element (**buffer[8]**)
 
 ...
 
-[^10] → first element (buffer[0])
+**[^10]** → first element (**buffer[0]**)
 
-This naturally matches a countdown from 9 to 0.
+This naturally matches a **countdown** from **9 to 0**.
 
 Another sample:
 
 Syntax	Equivalent Index from start	Explanation	Value assigned
 
-[1]	buffer[1]	2nd element from start	0
+**[1]** → **buffer[1]** → 2nd element from star 0
 
-[2]	buffer[2]	3rd element from start	1
+**[2]** → **buffer[2]** → 3rd element from start 1
 
-[^3]	buffer[7]	3rd element from end	2
+**[^3]** → **buffer[7]** → 3rd element from end 2
 
-[4]	buffer[4]	5th element from start	3
+**[4]**	**buffer[4]** → 5th element from start 3
 
-[5]	buffer[5]	6th element from start	4
+**[5]**	**buffer[5]** → 6th element from start 4
 
-[^6]	buffer[4]	6th element from end	5 (overwrites previous 3)
+**[^6]** **buffer[4]** → 6th element from end 5 (overwrites previous 3)
 
-[^7]	buffer[3]	7th element from end	6
+**[^7]** → **buffer[3]** → 7th element from end 6
 
-[8]	buffer[8]	9th element from start	7
+**[8]**	→ **buffer[8]** → 9th element from start 7
 
-[^9]	buffer[1]	9th element from end	8 (overwrites previous 0)
+**[^9]** → **buffer[1]** → 9th element from end 8 (overwrites previous 0)
 
-[^10]	buffer[0]	10th element (first)	9
+**[^10]** →	**buffer[0]** → 10th element (first) 9
 
-Important: Notice that some positions are assigned twice:
+**Important**: Notice that some positions are assigned twice:
 
-[4] = 3 and later [^6] = 5 both refer to buffer[4]. The final value is 5.
+**[4] = 3** and later **[^6] = 5** both refer to **buffer[4]**. The final value is 5.
 
-[1] = 0 and later [^9] = 8 both refer to buffer[1]. The final value is 8.Syntax	Equivalent Index from start	Explanation	Value assigned
+**[1] = 0** and later **[^9] = 8** both refer to **buffer[1]**. The final value is 8.Syntax	Equivalent Index from start	Explanation	Value assigned
 
 ## 6. ref and unsafe in iterators and async methods
 
