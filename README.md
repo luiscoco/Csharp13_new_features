@@ -465,9 +465,83 @@ class Example
 }
 ```
 
-
 ## 5. Implicit index access
 
+In previous versions of C#, when **initializing** collections or arrays within an **object initializer**, you had to specify indexes explicitly from the front.
+
+With **C# 13**, you can now use the implicit "from-the-end" index operator (**^**) directly within an object initializer expression.
+
+This makes code simpler and clearer, especially when you want to initialize arrays from the end, making indexing more intuitive and readable.
+
+### 5.1. Previous C# 13 Sample
+
+Previously, if you wanted to initialize an array's elements from the end, you had to manually calculate indices from the front.
+
+```csharp
+public class TimerRemaining
+{
+    public int[] buffer { get; set; } = new int[10];
+}
+
+// Pre C# 13 way:
+var countdown = new TimerRemaining()
+{
+    buffer =
+    {
+        [9] = 0,
+        [8] = 1,
+        [7] = 2,
+        [6] = 3,
+        [5] = 4,
+        [4] = 5,
+        [3] = 6,
+        [2] = 7,
+        [1] = 8,
+        [0] = 9
+    }
+};
+```
+
+### 5.2. New C# 13 way (with implicit indexing using ^)
+
+In **C# 13**, you can directly specify indices from the end using the **^** operator.
+
+```csharp
+public class TimerRemaining
+{
+    public int[] buffer { get; set; } = new int[10];
+}
+
+// C# 13 way:
+var countdown = new TimerRemaining()
+{
+    buffer =
+    {
+        [^1] = 0,  // last element
+        [^2] = 1,
+        [^3] = 2,
+        [^4] = 3,
+        [^5] = 4,
+        [^6] = 5,
+        [^7] = 6,
+        [^8] = 7,
+        [^9] = 8,
+        [^10] = 9  // first element
+    }
+};
+```
+
+How the indexing with ^ works:
+
+[^1] → last element (buffer[9])
+
+[^2] → second-to-last element (buffer[8])
+
+...
+
+[^10] → first element (buffer[0])
+
+This naturally matches a countdown from 9 to 0.
 
 
 ## 6. ref and unsafe in iterators and async methods
