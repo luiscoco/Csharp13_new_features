@@ -126,7 +126,65 @@ UseMyCollection(1, 2, 3);
 
 ## 2. New lock object
 
+In **C# 13** and **.NET 9**, there's a new thread synchronization primitive: **System.Threading.Lock**.
 
+It offers improved synchronization performance and cleaner semantics compared to the previous lock pattern, which used the traditional **System.Threading.Monitor**.
+
+**Previously**, the **lock** statement used the **System.Threading.Monitor** class under the hood:
+
+```csharp
+private readonly object _sync = new();
+
+lock (_sync)
+{
+    // critical section
+}
+```
+
+Now, **.NET 9** introduces the new synchronization primitive **System.Threading.Lock**, improving clarity and performance.
+
+**Key changes**:
+
+Provides a clear, structured API using **EnterScope()** method returning a **ref struct**.
+
+Uses the **Dispose()** pattern implicitly, enabling simpler and safer code through the **using** statement.
+
+The compiler automatically detects if the **lock** target is a **Lock** type and uses its optimized **API**.
+
+If the **lock** object is converted or cast to another type, the compiler will revert to generating the traditional Monitor-based locking code.
+
+### 2.1. Basic Usage of the new Lock (System.Threading.Lock)
+
+```csharp
+using System.Threading;
+
+public class Counter
+{
+    private int _count;
+    private readonly Lock _lock = new();
+
+    public void Increment()
+    {
+        // Enter exclusive scope using new Lock type
+        using (_lock.EnterScope())
+        {
+            _count++;
+        }
+    }
+
+    public int GetCount()
+    {
+        using (_lock.EnterScope())
+        {
+            return _count;
+        }
+    }
+}
+```
+
+**EnterScope()** provides a safe entry/exit model for locking.
+
+**using** ensures the lock is properly exited (disposed) even if exceptions occur.
 
 ## 3. New escape sequence
 
