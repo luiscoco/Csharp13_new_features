@@ -806,6 +806,16 @@ b) A ref struct type cannot be directly cast or converted to an interface type, 
 
 c) Interface methods implemented by a ref struct type can only be accessed via a generic type parameter constrained with allows ref struct.
 
+**Summary & Benefits of "ref struct interfaces"**:
+
+a) Enables high-performance and memory-efficient generic coding patterns.
+
+b) Combines interface-driven designs with zero-allocation benefits of ref structs.
+
+c) Maintains safety by strict enforcement from the compiler.
+
+This powerful new feature in C# 13 provides better code reuse, clarity, and performance for advanced scenarios involving Span<T> and similar type
+
 ### 8.1. Key rules to remember
 
 This is allowed:
@@ -879,6 +889,51 @@ class Program
 }
 ```
 
+### 8.3. Real-world scenario (Using with Span<T>)
+
+```csharp
+public interface IFormatter
+{
+    void Format();
+}
+
+public ref struct SpanFormatter<T> : IFormatter
+{
+    private ReadOnlySpan<T> _span;
+
+    public SpanFormatter(ReadOnlySpan<T> span)
+    {
+        _span = span;
+    }
+
+    void IFormatter.Format()
+    {
+        foreach (var item in _span)
+        {
+            Console.Write($"{item} ");
+        }
+        Console.WriteLine();
+    }
+}
+
+class Example
+{
+    static void FormatAndPrint<TFormatter>(scoped TFormatter formatter)
+        where TFormatter : allows ref struct, IFormatter
+    {
+        formatter.Format();
+    }
+
+    static void Main()
+    {
+        SpanFormatter<int> numbersFormatter = new(stackalloc int[] { 1, 2, 3 });
+        SpanFormatter<char> charsFormatter = new("ABC".AsSpan());
+
+        FormatAndPrint(numbersFormatter);  // Outputs: 1 2 3
+        FormatAndPrint(charsFormatter);    // Outputs: A B C
+    }
+}
+```
 
 ## 9. More partial members
 
