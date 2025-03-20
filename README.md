@@ -123,3 +123,40 @@ UseMyCollection(1, 2, 3);
 ```
 // Output: 1 2 3
 ```
+
+## 2. New lock object
+
+
+
+## 3. New escape sequence
+
+
+## 4. Method group natural type
+
+
+## 5. Implicit index access
+
+
+
+## 6. ref and unsafe in iterators and async methods
+
+
+## 7. allows ref struct
+
+
+
+## 8. ref struct interfaces
+
+
+
+## 9. More partial members
+
+
+
+## 10. Overload resolution priority
+
+
+
+## 11. The field keyword
+
+
