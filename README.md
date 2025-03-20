@@ -543,9 +543,57 @@ How the indexing with ^ works:
 
 This naturally matches a countdown from 9 to 0.
 
+Another sample:
+
+Syntax	Equivalent Index from start	Explanation	Value assigned
+
+[1]	buffer[1]	2nd element from start	0
+
+[2]	buffer[2]	3rd element from start	1
+
+[^3]	buffer[7]	3rd element from end	2
+
+[4]	buffer[4]	5th element from start	3
+
+[5]	buffer[5]	6th element from start	4
+
+[^6]	buffer[4]	6th element from end	5 (overwrites previous 3)
+
+[^7]	buffer[3]	7th element from end	6
+
+[8]	buffer[8]	9th element from start	7
+
+[^9]	buffer[1]	9th element from end	8 (overwrites previous 0)
+
+[^10]	buffer[0]	10th element (first)	9
+
+Important: Notice that some positions are assigned twice:
+
+[4] = 3 and later [^6] = 5 both refer to buffer[4]. The final value is 5.
+
+[1] = 0 and later [^9] = 8 both refer to buffer[1]. The final value is 8.Syntax	Equivalent Index from start	Explanation	Value assigned
 
 ## 6. ref and unsafe in iterators and async methods
 
+Before C# 13, the compiler restricted certain scenarios involving:
+
+ref locals
+ref struct types (like Span<T> or ReadOnlySpan<T>)
+unsafe contexts
+in both async methods (async/await) and iterator methods (yield return).
+
+This was due to complexity in managing lifetime and safety around asynchronous boundaries and iterator state machines.
+
+What has changed in C# 13?
+C# 13 relaxes these restrictions, allowing:
+
+✅ Async methods and iterators to declare local ref variables.
+✅ Async methods and iterators to declare locals of a ref struct type (such as Span<T> or ReadOnlySpan<T>).
+✅ unsafe contexts to be used within iterators (but still restricted near yield statements).
+However, there's a key safety rule:
+
+⚠️ You cannot use ref locals or ref struct types across an await boundary (await expression) or yield return boundary.
+The compiler strictly enforces these rules, ensuring safety and correctness.
 
 ## 7. allows ref struct
 
