@@ -262,6 +262,59 @@ This behavior ensures backward compatibility if your codebase requires legacy sy
 
 ## 3. New escape sequence
 
+In **C# 13**, a new character literal escape sequence has been introduced:
+
+**\e** → Represents the **ESCAPE** character (Unicode U+001B).
+
+Previously, to represent the **ESCAPE** character, you had to use either:
+
+**\u001b** (unicode escape)
+
+**\x1b** (hexadecimal escape)
+
+But these had downsides:
+
+**\x1b** could lead to errors because if the following character(s) were valid hexadecimal digits, the compiler would include them in the escape sequence unintentionally.
+
+**\u001b** was safer but verbose.
+
+The new **\e** escape sequence is concise, safe, and readable.
+
+The new **\e** escape sequence in **C# 13** provides a cleaner, safer, and more readable way to represent the **ESC** character (**U+001B**), especially useful in console applications leveraging terminal escape sequences and color formatting.
+
+### 3.1. Basic Sample
+
+```csharp
+Console.WriteLine("This is an escape character: '\e'");
+```
+
+This will print:
+
+```
+This is an escape character: '←'  // ← represents the ESC character visually
+```
+
+### 3.2. ANSI escape codes (terminal colors)
+
+ANSI escape sequences (commonly used for coloring and formatting terminals) start with an ESC character. Using the new \e simplifies the syntax significantly
+
+**Old way**:
+
+```csharp
+Console.WriteLine("\u001b[32mHello in Green!\u001b[0m");
+```
+
+**New way (C# 13+)**:
+
+```csharp
+Console.WriteLine("\e[32mHello in Green!\e[0m");
+```
+
+Both examples print:
+
+![image](https://github.com/user-attachments/assets/7569a014-242c-4f5d-8e63-89c79085e28f)
+
+
 
 ## 4. Method group natural type
 
