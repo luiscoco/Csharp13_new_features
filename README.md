@@ -186,6 +186,64 @@ public class Counter
 
 **using** ensures the lock is properly exited (disposed) even if exceptions occur.
 
+### 2.2 Using new Lock object with the traditional lock statement
+
+You don't need to rewrite your code structure
+
+The compiler recognizes if you're using a Lock object in the traditional syntax
+
+```csharp
+using System.Threading;
+
+public class Cache
+{
+    private readonly Dictionary<string, string> _cache = new();
+    private readonly Lock _lock = new();
+
+    public void AddOrUpdate(string key, string value)
+    {
+        lock (_lock)
+        {
+            _cache[key] = value;
+        }
+    }
+
+    public string? GetValue(string key)
+    {
+        lock (_lock)
+        {
+            return _cache.TryGetValue(key, out var value) ? value : null;
+        }
+    }
+}
+```
+
+### 2.3. Fallback to Traditional Monitor-based Locking
+
+If you explicitly cast or convert a **Lock** object to another type, the compiler will revert to traditional Monitor locking
+
+```csharp
+using System.Threading;
+
+public class Demo
+{
+    private readonly Lock _lock = new();
+
+    public void Execute()
+    {
+        object legacyLock = _lock; // implicit conversion
+
+        lock (legacyLock)
+        {
+            // Compiler will use Monitor.Enter/Exit here, not the new Lock API
+        }
+    }
+}
+```
+
+This behavior ensures backward compatibility if your codebase requires legacy synchronization behavior.
+
+
 ## 3. New escape sequence
 
 
