@@ -153,6 +153,22 @@ The compiler automatically detects if the **lock** target is a **Lock** type and
 
 If the **lock** object is converted or cast to another type, the compiler will revert to generating the traditional Monitor-based locking code.
 
+**Benefits of the new Lock object**:
+
+**Performance**: Improved and optimized for modern hardware and runtime.
+
+**Clarity**: Explicit, well-defined API makes it clear where locking begins and ends.
+
+**Safety**: Built-in disposal pattern (IDisposable) ensures locks are released appropriately.
+
+**Compatibility**: Automatically integrates with existing lock syntax without requiring major code changes.
+
+**Summary**:
+
+With the introduction of **System.Threading.Lock** in **C# 13** and **.NET 9**, you get a modern, high-performance synchronization primitive that integrates seamlessly into your existing codebase.
+
+Simply changing the **lock** object from **object** to **Lock** gives you immediate performance and safety improvements without needing further significant refactoring.
+
 ### 2.1. Basic Usage of the new Lock (System.Threading.Lock)
 
 ```csharp
