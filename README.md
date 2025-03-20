@@ -935,9 +935,175 @@ class Example
 }
 ```
 
-## 9. More partial members
+## 9. More partial members (properties and indexers)
 
+**Before C# 13**, the **partial** keyword could only be used with **classes**, **structs**, **methods**, and **interfaces**. 
 
+Now, **C# 13** extends this support by allowing:
+
+a) Partial **properties**
+
+b) Partial **indexers**
+
+These behave similarly to **partial methods**:
+
+You have one declaring **declaration** (just the **signature**).
+
+And **one implementing** declaration (the actual **logic**).
+
+You cannot use auto-property syntax in the implementing declaration. You must explicitly implement getter/setter logic.
+
+If a property declaration has no body, it's considered the declaring declaration.
+
+**Summary of "More partial members" in C# 13**:
+
+a) Partial properties & partial indexers now allowed
+
+b) Clearly separate declaration and implementation
+
+c) Explicit implementation (no auto-properties)
+
+d) Ideal for code-generation and organizing complex codebases
+
+This new feature enhances flexibility, readability, and maintainability, especially when combined with advanced tooling, source generators, or large-scale projects.
+
+**Important restrictions and points to remember**:
+
+You can't use auto-property syntax for the implementation.
+
+**Not allowed**:
+
+```csharp
+public partial string Name { get; set; } // invalid as implementation
+```
+
+**Allowed**:
+
+```csharp
+public partial string Name { get => _name; set => _name = value; } // valid
+```
+
+Signatures must match exactly between declaring and implementing declarations.
+
+This feature is helpful when using code generation or splitting implementation logic clearly between different files or partial class definitions.
+
+### 9.1. Partial Properties sample
+
+**Declaring declaration**:
+
+```csharp
+public partial string Name { get; set; }
+```
+
+**Implementing declaration** (no auto-properties allowed):
+
+```csharp
+private string _name;
+
+public partial string Name
+{
+    get => _name;
+    set => _name = value;
+}
+```
+
+### 9.2. Simple Practical Example (Partial Property):
+
+**Step 1: Declaring declaration**
+
+```csharp
+// PartialClass.Part1.cs
+public partial class User
+{
+    public partial string Email { get; set; }
+}
+```
+
+**Step 2: Implementing declaration**
+
+```csharp
+// PartialClass.Part2.cs
+public partial class User
+{
+    private string _email;
+
+    public partial string Email
+    {
+        get => _email;
+        set
+        {
+            if (!value.Contains("@"))
+                throw new ArgumentException("Invalid email format.");
+
+            _email = value;
+        }
+    }
+}
+```
+
+**Step 3: Usage**
+
+```csharp
+class Program
+{
+    static void Main()
+    {
+        User user = new User();
+        user.Email = "user@example.com";
+        Console.WriteLine($"Email set to: {user.Email}");
+
+        // Uncommenting below will throw an exception:
+        // user.Email = "invalidEmail";
+    }
+}
+```
+
+### 9.3.  Example for Partial Indexer (New Feature)
+
+Similarly, you can now use partial **indexers**
+
+**Step 1: Declaring partial indexer**
+
+```csharp
+public partial class DataCollection
+{
+    public partial string this[int index] { get; set; }
+}
+```
+
+**Step 2: Implementing partial indexer**
+
+```csharp
+public partial class DataCollection
+{
+    private readonly Dictionary<int, string> _data = new();
+
+    public partial string this[int index]
+    {
+        get => _data.TryGetValue(index, out var val) ? val : "N/A";
+        set => _data[index] = value;
+    }
+}
+```
+
+**Step 3: Usage**
+
+```csharp
+class Program
+{
+    static void Main()
+    {
+        var collection = new DataCollection();
+
+        collection[1] = "First";
+        collection[2] = "Second";
+
+        Console.WriteLine(collection[1]); // Output: First
+        Console.WriteLine(collection[2]); // Output: Second
+        Console.WriteLine(collection[3]); // Output: N/A
+    }
+}
+```
 
 ## 10. Overload resolution priority
 
