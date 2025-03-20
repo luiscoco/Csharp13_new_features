@@ -314,7 +314,51 @@ Both examples print:
 
 ![image](https://github.com/user-attachments/assets/7569a014-242c-4f5d-8e63-89c79085e28f)
 
+### 3.3. How to use '\e' escape sequence in a C# 13 console application 
 
+Here's a simple yet clear example demonstrating how you can use the new \e escape sequence in a C# 13 console application to leverage ANSI escape codes for coloring text in the terminal
+
+```csharp
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        // Print text in different colors using ANSI escape codes
+        Console.WriteLine("\e[31mThis text is red!\e[0m");
+        Console.WriteLine("\e[32mThis text is green!\e[0m");
+        Console.WriteLine("\e[33mThis text is yellow!\e[0m");
+        Console.WriteLine("\e[34mThis text is blue!\e[0m");
+
+        // Bold text
+        Console.WriteLine("\e[1mThis text is bold!\e[0m");
+
+        // Background color example
+        Console.WriteLine("\e[44;97mWhite text on blue background!\e[0m");
+    }
+}
+```
+
+Explanation of the **ANSI** escape sequences used:
+
+**\e[31m** → **Red** foreground color
+
+**\e[32m** → **Green** foreground color
+
+**\e[33m** → **Yellow** foreground color
+
+**\e[34m** → **Blue** foreground color
+
+**\e[1m** → **Bold** text
+
+**\e[44;97m** → **Blue background (44)** and **white foreground (97)**
+
+**\e[0m** → **Reset** all formatting **to default**
+
+When running the application you see this output
+
+![image](https://github.com/user-attachments/assets/53854cf6-ec36-4a5d-a4dc-1ba8ca05bfd5)
 
 ## 4. Method group natural type
 
