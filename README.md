@@ -707,9 +707,90 @@ class UnsafeIteratorExample
 }
 ```
 
-
 ## 7. allows ref struct
 
+**Before C# 13**, you couldn't use **ref struct** types (like **Span<T>**, **ReadOnlySpan<T>**) as type arguments for generic methods or classes.
+
+This was due to **safety constraints** and limitations imposed by the compiler.
+
+Now, **C# 13** introduces a special constraint called allows **ref struct** that explicitly permits generic type parameters to accept ref struct types.
+
+This new constraint explicitly indicates:
+
+a) You can now pass a ref struct (such as Span<T>) as a generic type parameter.
+
+b) The compiler enforces ref safety rules strictly.
+
+c) Enables high-performance, zero-allocation code patterns with generic code.
+
+### 7.1. Basic Sample
+
+```csharp
+using System;
+
+public class Container<T> where T : allows ref struct
+{
+    public void Display(scoped T item)
+    {
+        // Scoped ensures "item" respects ref-safety rules
+        Console.WriteLine($"Type of T: {typeof(T)}");
+        Console.WriteLine(item.ToString());
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        // Example using ReadOnlySpan<char> (ref struct type)
+        ReadOnlySpan<char> textSpan = "Hello, C#13!";
+        
+        var spanContainer = new Container<ReadOnlySpan<char>>();
+        spanContainer.Display(textSpan);
+
+        // Also allowed with normal structs
+        int number = 42;
+        var intContainer = new Container<int>();
+        intContainer.Display(number);
+    }
+}
+```
+
+**Why do you need the scoped keyword?**
+
+When using ref struct parameters, C# enforces strict lifetime rules.
+
+The keyword scoped explicitly tells the compiler that the parameter (item) won't escape the method scope.
+
+This ensures safe usage of ref struct types in generic scenarios.
+
+### 7.2. Generic method with allows ref struct
+
+```csharp
+using System;
+
+class GenericExample
+{
+    public static void PrintFirstElement<T>(scoped T span) 
+        where T : allows ref struct, IReadOnlySpan<int>
+    {
+        if (span.Length > 0)
+        {
+            Console.WriteLine($"First element: {span[0]}");
+        }
+    }
+
+    static void Main()
+    {
+        ReadOnlySpan<int> numbers = stackalloc int[] { 10, 20, 30 };
+        PrintFirstElement(numbers);
+    }
+}
+```
+
+Method accepts any **ref struct type** that implements **IReadOnlySpan<int>** (e.g., **ReadOnlySpan<int>**).
+
+**allows ref struct** explicitly permits this usage.
 
 
 ## 8. ref struct interfaces
