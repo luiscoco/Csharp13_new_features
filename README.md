@@ -362,6 +362,87 @@ When running the application you see this output
 
 ## 4. Method group natural type
 
+In C#, a method group refers to the set of **methods** that share the **same name**, including all overloads. 
+
+Previously, when resolving overloads, the compiler gathered all candidate methods from all scopes and then determined a "natural type" (like a delegate or expression type) from the entire set of candidates.
+
+This could be inefficient or ambiguous, especially with **generic methods** or **constrained methods** that couldn't apply.
+
+### 4.1. What's changed in C# 13?
+
+**Previous behavior**:
+
+The compiler always collected all methods with the matching name, even if many methods weren't suitable (e.g., due to generic arity mismatch or unsatisfied constraints).
+
+**New behavior**:
+
+**C# 13** introduces pruning ('poda' in spanish) during overload resolution. 
+
+At each scope:
+
+The compiler first eliminates (prunes) methods that clearly can't match (wrong generic parameters count, unsatisfied generic constraints, etc.).
+
+If no suitable method is found at the current scope, it moves outward to the next scope.
+
+If multiple candidates are still suitable, the compiler proceeds as usual.
+
+If no candidates apply, the method group won't have a natural type.
+
+This makes overload resolution more accurate, efficient, and aligned with intuitive expectations.
+
+### 4.2. Sample Before (prior to C# 13)
+
+```csharp
+using System;
+
+class Demo
+{
+    static void Run(Action action) => action();
+    static void Run(Func<int> func) => Console.WriteLine(func());
+
+    static void Test() => Console.WriteLine("Test method invoked.");
+
+    static int Test<T>() => 42;
+
+    static void Main()
+    {
+        // Method group "Test" includes:
+        // - void Test()
+        // - int Test<T>()
+        
+        Run(Test); 
+        // Previously, compiler would gather all methods,
+        // creating ambiguity or requiring explicit selection.
+    }
+}
+```
+
+
+### 4.3. Sample After C# 13
+
+```csharp
+using System;
+
+class Demo
+{
+    static void Run(Action action) => action();
+    static void Run(Func<int> func) => Console.WriteLine(func());
+
+    static void Test() => Console.WriteLine("Test method invoked.");
+
+    static int Test<T>() => 42;
+
+    static void Main()
+    {
+        Run(Test);
+        // Now, the generic method Test<T>() with wrong arity
+        // is automatically pruned as it can't match Action or Func<int>.
+        // The compiler easily selects "void Test()" as Action.
+    }
+}
+```
+
+
 
 ## 5. Implicit index access
 
