@@ -442,6 +442,28 @@ class Demo
 }
 ```
 
+Other sample:
+
+```csharp
+using System;
+
+class Example
+{
+    static void Call(Action action) => action();
+
+    static void Method() => Console.WriteLine("Non-generic method");
+
+    static void Method<T>() where T : IDisposable
+        => Console.WriteLine("Generic method with IDisposable constraint");
+
+    static void Main()
+    {
+        Call(Method); 
+        // Generic "Method<T>()" is pruned due to unsatisfied constraint,
+        // compiler directly picks "Method()".
+    }
+}
+```
 
 
 ## 5. Implicit index access
