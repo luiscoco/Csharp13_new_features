@@ -792,9 +792,92 @@ Method accepts any **ref struct type** that implements **IReadOnlySpan<int>** (e
 
 **allows ref struct** explicitly permits this usage.
 
-
 ## 8. ref struct interfaces
 
+**Before C# 13**, **ref struct types** (like Span<T> or your own stack-only structures) **couldn't implement interfaces**. 
+
+**C# 13** removes this limitation, **allowing ref struct types to implement interfaces**.
+
+However, there are strict rules to maintain ref safety:
+
+a) A ref struct can implement interfaces explicitly.
+
+b) A ref struct type cannot be directly cast or converted to an interface type, as that would require boxing, violating ref safety rules.
+
+c) Interface methods implemented by a ref struct type can only be accessed via a generic type parameter constrained with allows ref struct.
+
+### 8.1. Key rules to remember
+
+This is allowed:
+
+```csharp
+public ref struct MyRefStruct : IMyInterface
+```
+
+This is not allowed:
+
+```csharp
+IMyInterface instance = myRefStruct;  // ❌ Error!
+```
+
+You can only access **interface methods** through a generic constraint with **allows ref struct**:
+
+```
+void Method<T>(scoped T item) where T : allows ref struct, IMyInterface
+```
+
+### 8.2. Example demonstrating ref struct interfaces (C# 13)
+
+**Step 1: Define an Interface**
+
+```csharp
+public interface IPrintable
+{
+    void Print();
+}
+```
+
+**Step 2: Implement Interface with ref struct**
+
+```csharp
+public ref struct MySpanPrinter
+{
+    private ReadOnlySpan<char> _text;
+
+    public MySpanPrinter(ReadOnlySpan<char> text)
+    {
+        _text = text;
+    }
+
+    // Explicit interface implementation
+    void IPrintable.Print()
+    {
+        Console.WriteLine(_text.ToString());
+    }
+}
+```
+
+Correct Way to Access Interface methods from ref struct
+
+```csharp
+using System;
+
+class Program
+{
+    static void PrintGeneric<T>(scoped T item) 
+        where T : allows ref struct, IPrintable
+    {
+        item.Print(); // Safe: calls explicitly implemented interface method
+    }
+
+    static void Main()
+    {
+        MySpanPrinter printer = new MySpanPrinter("Hello from ref struct!");
+        
+        PrintGeneric(printer); //Valid and safe call
+    }
+}
+```
 
 
 ## 9. More partial members
