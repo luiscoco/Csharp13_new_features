@@ -1215,8 +1215,130 @@ Result: 15
 
 The compiler now prefers the overload with the highest priority, guiding users toward the newer, optimized overload.
 
-
-
 ## 11. The field keyword
 
+In **C# 13**, the **field** keyword (currently a preview feature) introduces a concise way to explicitly access the compiler-generated backing field of a property without manually declaring one.
 
+Traditionally, if you wanted custom logic in property accessors, you needed to explicitly declare a backing field:
+
+**Before C# 13**:
+
+```csharp
+private string _name;
+public string Name
+{
+    get => _name;
+    set => _name = value;
+}
+```
+
+Now, with **C# 13’s new field keyword**, the compiler auto-generates the backing field, and you can explicitly reference it in the accessor logic:
+
+**With C# 13 (field keyword)**:
+
+```csharp
+public string Name
+{
+    get => field;           // accesses compiler-generated backing field
+    set => field = value;   // sets compiler-generated backing field
+}
+```
+
+**Key points about the new 'field' keyword**:
+
+a) No explicit backing field declaration required.
+
+b) The compiler automatically creates the backing field when you use field.
+
+c) You can use field in one or both accessors (get or set).
+
+d) To avoid ambiguity with a member named field, you can use @field or this.field.
+
+### 11.1. Example 1: Simple validation scenario
+
+```csharp
+using System;
+
+class User
+{
+    public string Username
+    {
+        get => field;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Username cannot be empty.");
+
+            field = value.Trim();
+        }
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        User user = new User();
+        user.Username = "   Alice   ";
+        Console.WriteLine($"Username: '{user.Username}'");
+
+        // user.Username = ""; // would throw exception
+    }
+}
+```
+
+### 11.2. Example 2: Using only one accessor with the field keyword
+
+You can mix auto-generated accessor with explicit logic using field:
+
+```csharp
+using System;
+
+class Temperature
+{
+    public double Celsius
+    {
+        get; // auto-generated getter
+        set => field = value < -273.15 ? -273.15 : value; // Explicit setter logic
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Temperature temp = new Temperature();
+        
+        temp.Celsius = 25;
+        Console.WriteLine($"Temperature: {temp.Celsius} °C"); // 25
+
+        temp.Celsius = -300; 
+        Console.WriteLine($"Temperature after invalid set: {temp.Celsius} °C"); // -273.15 (limit enforced)
+    }
+}
+```
+
+### 11.3. Handling naming conflicts (Disambiguation):
+
+If your class has a field actually named **field**, you must disambiguate:
+
+```csharp
+class Sample
+{
+    private string field = "Hello";
+
+    public string Greeting
+    {
+        get => @field;     // explicitly references the actual field named "field"
+        set => @field = value;
+    }
+
+    public string AnotherGreeting
+    {
+        get => field;      // compiler-generated backing field (different from above)
+        set => field = value;
+    }
+}
+```
+
+Use **@field** or **this.field** to explicitly refer to your manually defined field.
