@@ -575,25 +575,138 @@ Important: Notice that some positions are assigned twice:
 
 ## 6. ref and unsafe in iterators and async methods
 
-Before C# 13, the compiler restricted certain scenarios involving:
+**Before C# 13**, the compiler **restricted** certain **scenarios** involving the following cases, in both **async methods** (async/await) and **iterator methods** (yield return).
 
-ref locals
-ref struct types (like Span<T> or ReadOnlySpan<T>)
-unsafe contexts
-in both async methods (async/await) and iterator methods (yield return).
+a) ref locals
+
+b) ref struct types (like Span<T> or ReadOnlySpan<T>)
+
+c) unsafe contexts
 
 This was due to complexity in managing lifetime and safety around asynchronous boundaries and iterator state machines.
 
-What has changed in C# 13?
-C# 13 relaxes these restrictions, allowing:
+### What has changed in C# 13?
 
-✅ Async methods and iterators to declare local ref variables.
-✅ Async methods and iterators to declare locals of a ref struct type (such as Span<T> or ReadOnlySpan<T>).
-✅ unsafe contexts to be used within iterators (but still restricted near yield statements).
+**C# 13** relaxes these restrictions, **allowing**:
+
+**Async methods** and **iterators** to declare **local ref** variables.
+
+**Async methods** and **iterators** to declare locals of a ref struct type (such as **Span<T>** or **ReadOnlySpan<T>**).
+
+**unsafe contexts** to be used within **iterators** (but still restricted near yield statements).
+
 However, there's a key safety rule:
 
-⚠️ You cannot use ref locals or ref struct types across an await boundary (await expression) or yield return boundary.
+You **cannot** use ref locals or ref struct types **across** an **await boundary** (await expression) or **yield return boundary**.
+
 The compiler strictly enforces these rules, ensuring safety and correctness.
+
+### 6.1. Async method using ReadOnlySpan<T>
+
+```csharp
+using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task<int> SumAsync(int[] data)
+    {
+        // Ref struct type: ReadOnlySpan<int>
+        ReadOnlySpan<int> span = data.AsSpan();
+
+        int sum = 0;
+
+        // Allowed: use span locally before await
+        foreach (int number in span)
+        {
+            sum += number;
+        }
+
+        await Task.Delay(100); // await boundary
+
+        // ❌ span can't be accessed here, after await boundary.
+        // foreach (int number in span) // Compiler Error!
+        // {
+        //     sum += number;
+        // }
+
+        return sum;
+    }
+
+    static async Task Main()
+    {
+        int result = await SumAsync(new[] { 1, 2, 3, 4 });
+        Console.WriteLine($"Sum: {result}");
+    }
+}
+```
+
+### 6.2. Iterator method (yield return) using Span<T>
+
+```csharp
+using System;
+
+class Example
+{
+    public static IEnumerable<int> GetFirstThree(int[] numbers)
+    {
+        Span<int> span = numbers.AsSpan();
+
+        // Allowed to use span locally here:
+        for (int i = 0; i < 3 && i < span.Length; i++)
+        {
+            int current = span[i]; // local ref struct usage allowed here
+            yield return current;  // yield boundary
+            
+            // ❌ span can't be used across yield boundaries.
+            // e.g., span[0] after yield return is not allowed.
+        }
+    }
+
+    static void Main()
+    {
+        foreach (int value in GetFirstThree(new[] { 10, 20, 30, 40 }))
+        {
+            Console.WriteLine(value);
+        }
+    }
+}
+```
+
+### 6.3. unsafe context in an iterator
+
+```csharp
+using System;
+using System.Collections.Generic;
+
+class UnsafeIteratorExample
+{
+    public static IEnumerable<int> UnsafeIterator(int[] numbers)
+    {
+        // unsafe context allowed:
+        unsafe
+        {
+            fixed (int* ptr = numbers)
+            {
+                for (int i = 0; i < numbers.Length; i++)
+                {
+                    int value = *(ptr + i); // unsafe pointer access allowed here
+                    yield return value;     // yield must be in safe context
+                }
+            }
+        }
+    }
+
+    static void Main()
+    {
+        foreach (int num in UnsafeIterator(new[] { 100, 200, 300 }))
+        {
+            Console.WriteLine(num);
+        }
+    }
+}
+```
+
 
 ## 7. allows ref struct
 
