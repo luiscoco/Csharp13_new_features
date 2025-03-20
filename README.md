@@ -1,4 +1,4 @@
-# C # version 13 New Features Samples
+# C # version 13 New Features Samples (.NET 9 and Visual Studio 2022 version 17.12)
 
 ## 1. params collections
 
